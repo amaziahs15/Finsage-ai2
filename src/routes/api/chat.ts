@@ -41,33 +41,56 @@ You are FinSage AI — India's trusted finance copilot for MSMEs. Always profess
 
 
 async function computeHonestyScore(answer: string): Promise<{ score: number; breakdown: Record<string, number> }> {
-  // Heuristic Honesty Score (0-100):
-  // - Source Authority (25): official .gov.in URLs cited
-  // - Content Relevance (15): mentions Indian tax/compliance terms
-  // - Evidence Support (20): explicit citations/quotes
-  // - Source Recency (10): mentions FY/AY or a recent year
-  // - Cross-Source Agreement (10): >=2 distinct sources
-  // - Answer Groundedness (20): hedges when unsure ("verify", "may vary", "not sure")
-  const lower = answer.toLowerCase();
-  const govMatches = (answer.match(/[a-z0-9-]+\.gov\.in/gi) || []);
-  const uniqueGov = new Set(govMatches.map((s) => s.toLowerCase()));
-  const sourceAuthority = Math.min(25, uniqueGov.size * 12);
-  const relevanceTerms = ["gst", "tds", "roc", "gstr", "itc", "mca", "msme", "hsn", "sac", "cgst", "sgst", "igst"];
-  const relevance = Math.min(15, relevanceTerms.filter((k) => lower.includes(k)).length * 3);
-  const evidence = /source|section|rule|circular|notification|reference/i.test(answer) ? 20 : 10;
-  const recency = /(fy|ay)\s?20\d\d|20(2[3-9]|3\d)/i.test(answer) ? 10 : 5;
-  const agreement = uniqueGov.size >= 2 ? 10 : uniqueGov.size === 1 ? 6 : 3;
-  const grounded = /(verify|may vary|not sure|consult|check the latest|as of)/i.test(answer) ? 20 : 12;
-  const score = sourceAuthority + relevance + evidence + recency + agreement + grounded;
+  // Honesty Score (0-100) based on official Indian government source citations.
+  // [40pts] Official .gov.in portal citations
+  // [20pts] Specific Section/Circular/Notification referenced
+  // [15pts] Financial Year specificity (not stale)
+  // [15pts] Multiple source corroboration (2+ distinct portals)
+  // [10pts] Appropriate hedging ("verify", "consult CA" etc.)
+  // Penalty: no .gov.in source caps score at 45
+
+  const TRUSTED_PORTALS = [
+    "gst.gov.in", "incometax.gov.in", "mca.gov.in", "msme.gov.in",
+    "mudra.org.in", "einvoice1.gst.gov.in", "udyamregistration.gov.in",
+    "samadhaan.msme.gov.in", "cbic.gov.in", "sebi.gov.in",
+    "rbi.org.in", "kviconline.gov.in", "cgtmse.in", "standupmitra.in"
+  ];
+
+  const govMatches = (answer.match(/[a-z0-9.-]+\.(?:gov\.in|org\.in)/gi) || [])
+    .map((s) => s.toLowerCase().replace(/[.,;:)]+$/, ""));
+  const uniqueGov = new Set(govMatches.filter((g) => TRUSTED_PORTALS.some((p) => g.includes(p))));
+  const trustedCount = uniqueGov.size;
+
+  // 40pts: 20 for first source, +10 per additional up to 40
+  const sourceScore = trustedCount === 0 ? 0 : Math.min(40, 20 + (trustedCount - 1) * 10);
+
+  // 20pts: specific legal section, circular, notification, or form referenced
+  const hasLegalRef = /section\s+\d+[a-z]?|rule\s+\d+|circular\s+no|notification\s+no|schedule\s+[ivxlcdm]+|form\s+(gstr|26q|24q|16a|mgt|aoc)|\birn\b|\bgstn\b/i.test(answer);
+  const legalScore = hasLegalRef ? 20 : 0;
+
+  // 15pts: mentions current financial or assessment year
+  const hasFY = /(fy|ay|financial year|assessment year)\s*20\d\d|20(2[3-9]|3\d)/i.test(answer);
+  const recencyScore = hasFY ? 15 : 5;
+
+  // 15pts: 2+ distinct trusted sources = cross-verified
+  const crossScore = trustedCount >= 2 ? 15 : trustedCount === 1 ? 7 : 0;
+
+  // 10pts: appropriate epistemic hedging
+  const hasHedge = /(verify|consult.*ca|check.*latest|as of|subject to|may vary|rates? may|please confirm|recommend consulting)/i.test(answer);
+  const hedgeScore = hasHedge ? 10 : 3;
+
+  let raw = sourceScore + legalScore + recencyScore + crossScore + hedgeScore;
+  // Cap at 45 if no official gov source cited at all
+  if (trustedCount === 0) raw = Math.min(raw, 45);
+
   return {
-    score: Math.max(0, Math.min(100, score)),
+    score: Math.max(0, Math.min(100, raw)),
     breakdown: {
-      source_authority: sourceAuthority,
-      relevance,
-      evidence,
-      recency,
-      agreement,
-      grounded,
+      official_sources: sourceScore,
+      legal_references: legalScore,
+      recency: recencyScore,
+      cross_verified: crossScore,
+      appropriate_hedging: hedgeScore,
     },
   };
 }
