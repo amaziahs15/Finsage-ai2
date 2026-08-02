@@ -53,44 +53,29 @@ function ChatPage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const stopAudio = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = "";
-      audioRef.current = null;
-    }
+    window.speechSynthesis.cancel();
     setSpeakingId(null);
     setLoadingAudioId(null);
   }, []);
 
   const speak = useCallback(async (id: string, text: string) => {
-    if (speakingId === id || loadingAudioId === id) { stopAudio(); return; }
+    if (speakingId === id) { stopAudio(); return; }
     stopAudio();
     const clean = text.replace(/```[\s\S]*?```/g, "").replace(/[#>*_`\[\]()]/g, "").trim();
     if (!clean) return;
-    setLoadingAudioId(id);
-    try {
-      const { data: sess } = await supabase.auth.getSession();
-      const token = sess.session?.access_token;
-      if (!token) { setLoadingAudioId(null); return; }
-      const res = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ text: clean }),
-      });
-      if (!res.ok) { setLoadingAudioId(null); return; }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      audioRef.current = audio;
-      audio.onended = () => { setSpeakingId(null); URL.revokeObjectURL(url); };
-      audio.onerror = () => { setSpeakingId(null); URL.revokeObjectURL(url); };
-      setLoadingAudioId(null);
-      setSpeakingId(id);
-      await audio.play();
-    } catch {
-      setLoadingAudioId(null);
-    }
-  }, [speakingId, loadingAudioId, stopAudio]);
+    // Auto-detect language from Unicode script ranges
+    const autoLang = /[\u0B80-\u0BFF]/.test(clean)
+      ? "ta-IN"  // Tamil script
+      : /[\u0900-\u097F]/.test(clean)
+      ? "hi-IN"  // Devanagari (Hindi)
+      : "en-IN"; // Default English
+    const utterance = new SpeechSynthesisUtterance(clean);
+    utterance.lang = autoLang;
+    utterance.onend = () => setSpeakingId(null);
+    utterance.onerror = () => setSpeakingId(null);
+    setSpeakingId(id);
+    window.speechSynthesis.speak(utterance);
+  }, [speakingId, stopAudio, lang]);
 
   useEffect(() => () => stopAudio(), [stopAudio]);
 

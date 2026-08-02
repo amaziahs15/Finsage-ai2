@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { useI18n } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/marketing-chrome";
 import type { Lang, TranslationKey } from "@/lib/translations";
@@ -113,16 +112,17 @@ function AuthPage() {
     setError(null);
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
       });
-      if (result.error) {
-        setError(result.error.message || t("auth_err_generic"));
+      if (error) {
+        setError(error.message || t("auth_err_generic"));
         setLoading(false);
-        return;
       }
-      if (result.redirected) return;
-      navigate({ to: "/dashboard", replace: true });
+      // If no error, Supabase redirects the user to Google automatically
     } catch (err) {
       console.error(err);
       setError(t("auth_err_generic"));

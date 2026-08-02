@@ -186,17 +186,17 @@ When the user's question is about their own finances, invoices, receivables, bud
           { role: "user", content: body.message },
         ];
 
-        const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey) return new Response("Missing GEMINI_API_KEY", { status: 500 });
+        const apiKey = process.env.GROQ_API_KEY;
+        if (!apiKey) return new Response("Missing GROQ_API_KEY", { status: 500 });
 
-        const upstream = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
+        const upstream = await fetch("https://api.groq.com/openai/v1/chat/completions", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: "gemini-2.0-flash",
+            model: "llama-3.3-70b-versatile",
             messages,
             stream: true,
           }),
@@ -204,9 +204,9 @@ When the user's question is about their own finances, invoices, receivables, bud
 
         if (!upstream.ok || !upstream.body) {
           const errText = await upstream.text().catch(() => "");
-          console.error(`Gemini API error ${upstream.status}:`, errText);
-          if (upstream.status === 429) return new Response(`Rate limited by Gemini: ${errText}`, { status: 429 });
-          if (upstream.status === 401 || upstream.status === 403) return new Response(`Invalid or missing GEMINI_API_KEY (${upstream.status})`, { status: 500 });
+          console.error(`Groq API error ${upstream.status}:`, errText);
+          if (upstream.status === 429) return new Response(`Rate limited by Groq: ${errText}`, { status: 429 });
+          if (upstream.status === 401 || upstream.status === 403) return new Response(`Invalid or missing GROQ_API_KEY (${upstream.status})`, { status: 500 });
           return new Response(`AI error ${upstream.status}: ${errText}`, { status: 500 });
         }
 
