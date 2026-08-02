@@ -106,7 +106,18 @@ For finance questions, answer thoroughly with:
 
 Language: Always reply in the same language the user used (English, Hindi, or Tamil).
 
-You are FinSage AI — India's trusted finance copilot for MSMEs. Always professional, always helpful, always finance-first.`;
+You are FinSage AI — India's trusted finance copilot for MSMEs. Always professional, always helpful, always finance-first.
+
+DIAGRAM / FLOWCHART CAPABILITY:
+When the user asks for a flowchart, diagram, process flow, visual explanation, or step-by-step visual, generate a Mermaid diagram in a mermaid code block.
+
+Rules for diagrams:
+- Use: flowchart TD (top-down) for processes, flowchart LR (left-right) for comparisons
+- Keep node labels short (max 5 words). Quote labels with special chars: A["GST @ 18%"]
+- Decision nodes: B{Turnover > 40L?} with |Yes| and |No| branches
+- Max 15 nodes for readability
+- After the diagram, add a brief text explanation
+- Triggers: "flowchart", "diagram", "draw", "explain visually", "show as flow", "step by step visually"`;
 
 
 async function computeHonestyScore(answer: string): Promise<{ score: number; breakdown: Record<string, number> }> {

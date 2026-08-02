@@ -2,9 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Send, Mic, Paperclip, Plus, Sparkles, ExternalLink, ShieldCheck, Volume2, Loader2, Square } from "lucide-react";
+import { Send, Mic, Paperclip, Plus, Sparkles, ExternalLink, ShieldCheck, Volume2, Loader2, Square, Copy } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { MermaidChart } from "@/components/mermaid-chart";
 
 export const Route = createFileRoute("/_authenticated/chat")({
   head: () => ({ meta: [{ title: "Ask FinSage AI" }, { name: "robots", content: "noindex" }] }),
@@ -334,13 +335,35 @@ function MessageBubble({ m, speakingId, loadingAudioId, onSpeak }: {
         ) : (
           <div>
             <div className="prose prose-sm dark:prose-invert max-w-none text-foreground prose-pre:bg-muted prose-pre:text-foreground prose-code:text-teal prose-a:text-teal prose-table:text-sm prose-th:bg-muted">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content || ""}</ReactMarkdown>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  code({ className, children }) {
+                    const lang = /language-(\w+)/.exec(className || "")?.[1];
+                    if (lang === "mermaid") {
+                      return <MermaidChart code={String(children).replace(/\n$/, "")} />;
+                    }
+                    return <code className={className}>{children}</code>;
+                  },
+                }}
+              >
+                {m.content || ""}
+              </ReactMarkdown>
               {m.streaming && <span className="inline-block w-2 h-4 bg-teal ml-1 animate-pulse align-middle" />}
             </div>
             {!m.streaming && (
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <div className="mt-3 flex flex-wrap items-center gap-2">
                 {typeof m.honesty_score === "number" && (
                   <HonestyCard score={m.honesty_score} breakdown={m.honesty_breakdown ?? undefined} />
+                )}
+                {m.content && (
+                  <button
+                    onClick={() => navigator.clipboard.writeText(m.content)}
+                    className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs text-muted-foreground hover:bg-muted"
+                    title="Copy reply"
+                  >
+                    <Copy className="h-3 w-3" /> Copy
+                  </button>
                 )}
                 {m.content && (
                   <button
