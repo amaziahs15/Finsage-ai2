@@ -1,9 +1,78 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 
-// Streaming chat endpoint: accepts { conversation_id, message, language } and streams
-// the assistant response back as SSE-style chunks. Persists both messages to Supabase.
-// Uses Gemini API via the OpenAI-compatible endpoint (gemini-2.5-flash, free tier).
+// Streaming chat endpoint with real-time government website RAG (Retrieval-Augmented Generation).
+// For each finance question, fetches relevant official .gov.in pages and injects the content
+// as grounded context into the AI prompt. Honesty score reflects citation of those sources.
+
+// ---------------------------------------------------------------------------
+// GOV SOURCE MAP: topic keywords -> official page URLs to fetch
+// ---------------------------------------------------------------------------
+const GOV_SOURCE_MAP: { keywords: string[]; urls: string[] }[] = [
+  {
+    keywords: ["gst", "gstin", "gstr", "e-invoice", "einvoice", "irn", "itc", "input tax", "composition", "qrmp", "cgst", "sgst", "igst", "hsn", "sac", "invoice"],
+    urls: ["https://www.gst.gov.in/faqdetail"],
+  },
+  {
+    keywords: ["tds", "194c", "194j", "194h", "194i", "194a", "form 26q", "form 24q", "tcs", "tan", "deduct", "withholding"],
+    urls: ["https://incometaxindia.gov.in/Pages/tools/tds-rate-chart.aspx"],
+  },
+  {
+    keywords: ["income tax", "itr", "44ad", "44ada", "advance tax", "presumptive", "tax slab", "deduction", "section 80"],
+    urls: ["https://incometaxindia.gov.in/Pages/faqs.aspx"],
+  },
+  {
+    keywords: ["msme", "udyam", "mudra", "pmegp", "cgtmse", "standup india", "msmed", "delayed payment", "43b", "small enterprise"],
+    urls: ["https://msme.gov.in/faqs", "https://udyamregistration.gov.in/UdyamRegistration/StaticWebPages/faqs.aspx"],
+  },
+  {
+    keywords: ["roc", "mca", "company", "pvt ltd", "opc", "mgt-7", "aoc-4", "annual return", "agm", "director", "incorporation"],
+    urls: ["https://www.mca.gov.in/content/mca/global/en/data-and-reports/roc-filing.html"],
+  },
+  {
+    keywords: ["mudra loan", "mudra", "shishu", "kishore", "tarun"],
+    urls: ["https://www.mudra.org.in/Default"],
+  },
+];
+
+// Fetch and strip HTML from a government page (4s timeout)
+async function fetchGovPage(url: string): Promise<string> {
+  try {
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(4000),
+      headers: { "User-Agent": "Mozilla/5.0 FinSage-AI-Bot" },
+    });
+    if (!res.ok) return "";
+    const html = await res.text();
+    return html
+      .replace(/<script[\s\S]*?<\/script>/gi, "")
+      .replace(/<style[\s\S]*?<\/style>/gi, "")
+      .replace(/<nav[\s\S]*?<\/nav>/gi, "")
+      .replace(/<footer[\s\S]*?<\/footer>/gi, "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/\s{2,}/g, " ")
+      .trim()
+      .slice(0, 2500);
+  } catch {
+    return "";
+  }
+}
+
+// Match question to relevant gov URLs and fetch their content
+async function fetchRelevantGovContext(question: string): Promise<{ context: string; sources: string[] }> {
+  const lower = question.toLowerCase();
+  const matched: string[] = [];
+  for (const entry of GOV_SOURCE_MAP) {
+    if (entry.keywords.some((k) => lower.includes(k))) matched.push(...entry.urls);
+  }
+  const unique = [...new Set(matched)].slice(0, 3);
+  if (!unique.length) return { context: "", sources: [] };
+  const pages = await Promise.all(unique.map(fetchGovPage));
+  const snippets = pages.map((t, i) => t ? `[Source: ${unique[i]}]\n${t}` : "").filter(Boolean);
+  return { context: snippets.join("\n\n---\n\n"), sources: unique.filter((_, i) => pages[i]) };
+}
+
 
 type ChatBody = {
   conversation_id: string;
@@ -209,10 +278,16 @@ ${regLines.length ? regLines.join("\n") : "  (none published yet)"}
 --- END USER CONTEXT ---
 When the user's question is about their own finances, invoices, receivables, budgets, spending, or personal compliance deadlines, USE the numbers above. For regulatory questions, prefer the Regulatory Updates listed above when they match; otherwise answer from general compliance knowledge with official sources. You can freely mix both in one conversation.`;
 
-        const pageHint = body.page_context ? `\n\nThe user is currently on the "${body.page_context}" page — you can lightly bias your opening framing toward that topic, but still answer any question they ask.` : "";
+        const pageHint = body.page_context ? `\n\nThe user is currently on the "${body.page_context}" page.` : "";
+
+        // Fetch real-time official government website content (RAG)
+        const { context: govContext, sources: govSources } = await fetchRelevantGovContext(body.message);
+        const govBlock = govContext
+          ? `\n\n--- OFFICIAL GOVERNMENT SOURCES (fetched live for this question) ---\nThe following content was retrieved directly from official Indian government websites. Use this as your PRIMARY factual source. Always cite these URLs in your Sources section.\n\n${govContext}\n--- END OFFICIAL SOURCES ---\nIMPORTANT: Base your answer strictly on the above official content. Mention source URLs: ${govSources.join(", ")}`
+          : "";
 
         const messages = [
-          { role: "system", content: SYSTEM_PROMPT + langInstr + userContext + pageHint },
+          { role: "system", content: SYSTEM_PROMPT + langInstr + userContext + pageHint + govBlock },
           ...((history ?? []) as { role: string; content: string }[]).map((m) => ({ role: m.role, content: m.content })),
           { role: "user", content: body.message },
         ];
