@@ -9,6 +9,7 @@ import { useRouterState, Link } from "@tanstack/react-router";
 import { MessageSquare, X, Send, Sparkles, ExternalLink, ShieldCheck, Volume2, Loader2, Square, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { FlowchartRenderer } from "@/components/flowchart-renderer";
 
 type Msg = {
   id: string;
@@ -217,7 +218,18 @@ export function ChatWidget() {
                   ) : (
                     <div>
                       <div className="prose prose-sm dark:prose-invert max-w-none prose-a:text-teal prose-code:text-teal">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            code({ className, children }) {
+                              const lang = /language-(\w+)/.exec(className || "")?.[1];
+                              if (lang === "flowchart") {
+                                return <FlowchartRenderer raw={String(children).trim()} />;
+                              }
+                              return <code className={className}>{children}</code>;
+                            },
+                          }}
+                        >
                           {m.content || ""}
                         </ReactMarkdown>
                         {m.streaming && <span className="inline-block w-1.5 h-3 bg-teal ml-1 animate-pulse align-middle" />}
