@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedBudgetRouteImport } from './routes/_authenticated/budget'
+import { Route as AuthenticatedCalculatorRouteImport } from './routes/_authenticated/calculator'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedComplianceRouteImport } from './routes/_authenticated/compliance'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -43,6 +44,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedBudgetRoute = AuthenticatedBudgetRouteImport.update({
   id: '/budget',
   path: '/budget',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCalculatorRoute = AuthenticatedCalculatorRouteImport.update({
+  id: '/calculator',
+  path: '/calculator',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedChatRoute = AuthenticatedChatRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/budget': typeof AuthenticatedBudgetRoute
+  '/calculator': typeof AuthenticatedCalculatorRoute
   '/chat': typeof AuthenticatedChatRoute
   '/compliance': typeof AuthenticatedComplianceRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/budget': typeof AuthenticatedBudgetRoute
+  '/calculator': typeof AuthenticatedCalculatorRoute
   '/chat': typeof AuthenticatedChatRoute
   '/compliance': typeof AuthenticatedComplianceRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -147,6 +155,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/budget': typeof AuthenticatedBudgetRoute
+  '/_authenticated/calculator': typeof AuthenticatedCalculatorRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
   '/_authenticated/compliance': typeof AuthenticatedComplianceRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/budget'
+    | '/calculator'
     | '/chat'
     | '/compliance'
     | '/dashboard'
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/budget'
+    | '/calculator'
     | '/chat'
     | '/compliance'
     | '/dashboard'
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/budget'
+    | '/_authenticated/calculator'
     | '/_authenticated/chat'
     | '/_authenticated/compliance'
     | '/_authenticated/dashboard'
@@ -251,6 +263,13 @@ declare module '@tanstack/react-router' {
       path: '/budget'
       fullPath: '/budget'
       preLoaderRoute: typeof AuthenticatedBudgetRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/calculator': {
+      id: '/_authenticated/calculator'
+      path: '/calculator'
+      fullPath: '/calculator'
+      preLoaderRoute: typeof AuthenticatedCalculatorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/chat': {
@@ -342,6 +361,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedBudgetRoute: typeof AuthenticatedBudgetRoute
+  AuthenticatedCalculatorRoute: typeof AuthenticatedCalculatorRoute
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
   AuthenticatedComplianceRoute: typeof AuthenticatedComplianceRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -356,6 +376,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBudgetRoute: AuthenticatedBudgetRoute,
+  AuthenticatedCalculatorRoute: AuthenticatedCalculatorRoute,
   AuthenticatedChatRoute: AuthenticatedChatRoute,
   AuthenticatedComplianceRoute: AuthenticatedComplianceRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,

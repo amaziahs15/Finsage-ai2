@@ -224,6 +224,7 @@ const en = {
 
   // Settings
   app_schemes: "Schemes",
+  app_calculator: "Calculator",
   settings_title: "Settings",
   settings_sub: "Manage your profile, language and preferences.",
   settings_language: "Language",
@@ -464,6 +465,7 @@ const hi: Partial<Record<TranslationKey, string>> = {
   regulatory_no_action: "कार्रवाई की आवश्यकता नहीं",
   regulatory_empty: "अभी कोई नियामक अपडेट प्रकाशित नहीं।",
   app_schemes: "योजनाएँ",
+  app_calculator: "कैलकुलेटर",
 
   // Dashboard cards
   dash_greeting: "वापसी पर स्वागत है",
@@ -759,6 +761,7 @@ const ta: Partial<Record<TranslationKey, string>> = {
   regulatory_no_action: "நடவடிக்கை தேவையில்லை",
   regulatory_empty: "இதுவரை புதுப்பிப்புகள் இல்லை.",
   app_schemes: "திட்டங்கள்",
+  app_calculator: "கணிப்பொளி",
 
   // Dashboard cards
   dash_greeting: "மீண்டும் வரவேற்கிறோம்",

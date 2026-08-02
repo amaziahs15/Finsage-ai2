@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { useEffect, useRef, useState } from "react";
 import { useRouterState, Link } from "@tanstack/react-router";
-import { MessageSquare, X, Send, Sparkles, ExternalLink, ShieldCheck, Volume2, Loader2, Square } from "lucide-react";
+import { MessageSquare, X, Send, Sparkles, ExternalLink, ShieldCheck, Volume2, Loader2, Square, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -204,7 +204,16 @@ export function ChatWidget() {
               <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[85%] text-sm ${m.role === "user" ? "bg-navy text-white rounded-2xl rounded-br-md px-3 py-2" : "text-foreground"}`}>
                   {m.role === "user" ? (
-                    <div className="whitespace-pre-wrap">{m.content}</div>
+                    <div className="group relative">
+                      <div className="whitespace-pre-wrap">{m.content}</div>
+                      <button
+                        onClick={() => { navigator.clipboard.writeText(m.content); }}
+                        className="absolute -left-6 top-1 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 text-white/50 hover:text-white"
+                        title="Copy message"
+                      >
+                        <Copy className="h-3 w-3" />
+                      </button>
+                    </div>
                   ) : (
                     <div>
                       <div className="prose prose-sm dark:prose-invert max-w-none prose-a:text-teal prose-code:text-teal">
@@ -217,6 +226,15 @@ export function ChatWidget() {
                             <div className="inline-flex items-center gap-1 rounded-full bg-teal/10 border border-teal/30 px-2 py-0.5 text-xs text-teal font-medium">
                               <ShieldCheck className="h-3 w-3" /> {m.honesty_score}/100
                             </div>
+                          )}
+                          {m.content && (
+                            <button
+                              onClick={() => { navigator.clipboard.writeText(m.content); }}
+                              className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground hover:bg-muted"
+                              title="Copy reply"
+                            >
+                              <Copy className="h-3 w-3" /> Copy
+                            </button>
                           )}
                           {m.content && (
                             <button
