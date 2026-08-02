@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import mermaid from "mermaid";
 
 mermaid.initialize({
@@ -15,44 +15,49 @@ mermaid.initialize({
     fontFamily: "Inter, sans-serif",
     fontSize: "14px",
   },
-  flowchart: { curve: "basis", padding: 16 },
+  flowchart: { curve: "basis", padding: 20 },
   securityLevel: "loose",
 });
 
-let idCounter = 0;
+let counter = 0;
 
 export function MermaidChart({ code }: { code: string }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const [svg, setSvg] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [rendered, setRendered] = useState(false);
-  const chartId = useRef(`mermaid-${++idCounter}`);
 
   useEffect(() => {
-    if (!ref.current || !code.trim()) return;
+    const id = `mc-${++counter}-${Date.now()}`;
+    setSvg("");
     setError(null);
-    setRendered(false);
     mermaid
-      .render(chartId.current, code.trim())
-      .then(({ svg }) => {
-        if (ref.current) {
-          ref.current.innerHTML = svg;
-          const svgEl = ref.current.querySelector("svg");
-          if (svgEl) {
-            svgEl.removeAttribute("height");
-            svgEl.style.maxWidth = "100%";
-            svgEl.style.height = "auto";
-          }
-          setRendered(true);
-        }
+      .render(id, code.trim())
+      .then(({ svg: out }) => {
+        // Make SVG responsive
+        const responsive = out
+          .replace(/height="[^"]*"/, "")
+          .replace(/<svg /, '<svg style="max-width:100%;height:auto;" ');
+        setSvg(responsive);
       })
-      .catch((err) => setError(String(err?.message ?? err)));
+      .catch((err) => {
+        setError(String(err?.message ?? err));
+      });
   }, [code]);
 
   if (error) {
     return (
       <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: "0.75rem", padding: "1rem", marginTop: "0.5rem" }}>
-        <p style={{ color: "#f87171", fontSize: "0.75rem", margin: "0 0 0.5rem" }}>⚠️ Diagram error — raw code below:</p>
-        <pre style={{ color: "#94a3b8", fontSize: "0.75rem", overflowX: "auto", margin: 0 }}>{code}</pre>
+        <p style={{ color: "#f87171", fontSize: "0.75rem", margin: "0 0 0.5rem 0", fontWeight: 600 }}>⚠️ Diagram could not render. Showing source:</p>
+        <pre style={{ color: "#94a3b8", fontSize: "0.75rem", overflowX: "auto", margin: 0, whiteSpace: "pre-wrap" }}>{code}</pre>
+      </div>
+    );
+  }
+
+  if (!svg) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "1rem", color: "#64748b", fontSize: "0.8rem" }}>
+        <span style={{ display: "inline-block", width: "0.75rem", height: "0.75rem", border: "2px solid #14b8a6", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        Rendering diagram...
+        <style>{"@keyframes spin{to{transform:rotate(360deg)}}"}</style>
       </div>
     );
   }
@@ -66,14 +71,8 @@ export function MermaidChart({ code }: { code: string }) {
         padding: "1.25rem",
         marginTop: "0.75rem",
         overflowX: "auto",
-        minHeight: rendered ? undefined : "80px",
-        display: "flex",
-        alignItems: rendered ? undefined : "center",
-        justifyContent: rendered ? undefined : "center",
       }}
-    >
-      {!rendered && <span style={{ color: "#64748b", fontSize: "0.8rem" }}>⏳ Rendering diagram...</span>}
-      <div ref={ref} style={{ width: "100%" }} />
-    </div>
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
   );
 }
