@@ -183,17 +183,87 @@ function extractSources(text: string): string[] {
   return Array.from(new Set(urls.map((u) => u.replace(/[.,;:]$/, ""))));
 }
 
+// ---------------------------------------------------------------------------
+// SECURITY: Rate limiter (in-memory, per authenticated user)
+// 20 requests per 60 seconds per user ID.
+// ---------------------------------------------------------------------------
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const windowMs = 60_000; // 1 minute
+  const limit = 20;
+  const entry = rateLimitMap.get(userId);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(userId, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+  if (entry.count >= limit) return false;
+  entry.count++;
+  return true;
+}
+
+// Detect and block prompt injection attempts
+const INJECTION_PATTERNS = [
+  /ignore (all |previous |prior |above |prior |system )?instructions/i,
+  /you are now/i,
+  /disregard your (system |previous )?prompt/i,
+  /act as (a |an )?(?!FinSage)/i,
+  /jailbreak/i,
+  /\bDAN\b/,
+  /forget (everything|your instructions)/i,
+  /new persona/i,
+  /system prompt.*leak/i,
+  /print your (system |initial )?prompt/i,
+];
+function containsInjection(text: string): boolean {
+  return INJECTION_PATTERNS.some((p) => p.test(text));
+}
+
+// Validate UUID v4
+function isUUID(s: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s);
+}
+
+// Guard: fail fast if critical env vars are missing
+function assertEnv() {
+  const required = ["SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "GROQ_API_KEY"];
+  const missing = required.filter((k) => !process.env[k]);
+  if (missing.length) throw new Error(`Missing env vars: ${missing.join(", ")}`);
+}
+
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const body = (await request.json()) as ChatBody;
-        if (!body?.conversation_id || !body?.message?.trim()) {
-          return new Response("Bad request", { status: 400 });
+        // --- Env guard ---
+        try { assertEnv(); } catch (e) {
+          console.error("[chat] env error:", e);
+          return new Response("Server configuration error", { status: 500 });
         }
 
-        // Authenticate via bearer token
-        const authHeader = request.headers.get("authorization") || "";
+        // --- Parse body safely ---
+        let body: ChatBody;
+        try { body = (await request.json()) as ChatBody; } catch {
+          return new Response("Invalid JSON", { status: 400 });
+        }
+
+        // --- Input validation ---
+        const msg = body?.message?.trim() ?? "";
+        if (!body?.conversation_id || !msg) {
+          return new Response("Bad request: missing fields", { status: 400 });
+        }
+        if (!isUUID(body.conversation_id)) {
+          return new Response("Bad request: invalid conversation_id", { status: 400 });
+        }
+        if (msg.length > 2000) {
+          return new Response("Message too long (max 2000 characters)", { status: 400 });
+        }
+        if (containsInjection(msg)) {
+          return new Response("Message not allowed", { status: 400 });
+        }
+
+        // --- Authenticate via bearer token ---
+        const authHeader = request.headers.get("authorization") ?? "";
         const token = authHeader.replace(/^Bearer\s+/i, "");
         if (!token) return new Response("Unauthorized", { status: 401 });
 
@@ -204,6 +274,12 @@ export const Route = createFileRoute("/api/chat")({
         const { data: userData } = await supa.auth.getUser(token);
         const userId = userData.user?.id;
         if (!userId) return new Response("Unauthorized", { status: 401 });
+
+        // --- Rate limit (checked after auth so we have userId) ---
+        if (!checkRateLimit(userId)) {
+          return new Response("Too many requests. Please wait a moment.", { status: 429 });
+        }
+
 
         // Load prior messages
         const { data: history } = await supa
