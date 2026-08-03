@@ -379,12 +379,12 @@ function MessageBubble({ m, speakingId, loadingAudioId, onSpeak, onEdit }: {
         {isUser ? (
           <>
             <div className="whitespace-pre-wrap text-sm">{m.content}</div>
-            <div className="absolute right-full top-0 mr-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-card rounded-md shadow-sm border border-border p-0.5">
-              <button onClick={() => navigator.clipboard.writeText(m.content)} className="p-1 text-muted-foreground hover:text-navy hover:bg-muted rounded" title="Copy">
-                <Copy className="h-3 w-3" />
+            <div className="absolute right-full top-0 mr-2 flex flex-col md:flex-row items-center gap-1 bg-card rounded-md shadow-sm border border-border p-0.5 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+              <button onClick={() => navigator.clipboard.writeText(m.content)} className="p-1.5 text-muted-foreground hover:text-navy hover:bg-muted rounded" title="Copy">
+                <Copy className="h-3.5 w-3.5" />
               </button>
-              <button onClick={() => onEdit(m)} className="p-1 text-muted-foreground hover:text-teal hover:bg-muted rounded" title="Edit">
-                <Edit2 className="h-3 w-3" />
+              <button onClick={() => onEdit(m)} className="p-1.5 text-muted-foreground hover:text-teal hover:bg-muted rounded" title="Edit">
+                <Edit2 className="h-3.5 w-3.5" />
               </button>
             </div>
           </>
