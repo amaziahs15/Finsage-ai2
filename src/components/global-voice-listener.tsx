@@ -91,24 +91,25 @@ export function GlobalVoiceListener() {
     }
 
     // Dynamic nav routes including localized strings and common transliterations
+    // Dynamic nav routes including localized strings, common transliterations, and Tamil-script transliterations of English words
     const dynamicRoutes = [
       { to: "/dashboard", words: ["dashboard", "overview", "டேஷ்போர்டு", "கண்ணோட்டம்", t("app_dashboard").toLowerCase()] },
-      { to: "/chat", words: ["chat", "assistant", "ai", "உதவியாளர்", t("app_chat").toLowerCase()] },
-      { to: "/compliance", words: ["compliance", "compliances", "deadline", "deadlines", "inakkam", "anupalan", "இணக்கம்", t("app_compliance").toLowerCase()] },
-      { to: "/transactions", words: ["transaction", "transactions", "parivarthanai", "parivarthanaigal", "len-den", "lenden", "பரிவர்த்தனை", "பரிவர்த்தனைகள்", t("app_transactions").toLowerCase()] },
-      { to: "/invoices", words: ["invoice", "invoices", "bill", "bills", "vilaippattiyal", "vilaippattiyalgal", "பட்டியல்", "பட்டியல்கள்", t("app_invoices").toLowerCase()] },
-      { to: "/reports", words: ["report", "reports", "chart", "charts", "arikkai", "arikkaigal", "அறிக்கை", "அறிக்கைகள்", t("app_reports").toLowerCase()] },
+      { to: "/chat", words: ["chat", "assistant", "ai", "உதவியாளர்", "சாட்", t("app_chat").toLowerCase()] },
+      { to: "/compliance", words: ["compliance", "compliances", "deadline", "deadlines", "inakkam", "anupalan", "இணக்கம்", "கம்ப்ளையன்ஸ்", t("app_compliance").toLowerCase()] },
+      { to: "/transactions", words: ["transaction", "transactions", "parivarthanai", "parivarthanaigal", "len-den", "lenden", "பரிவர்த்தனை", "பரிவர்த்தனைகள்", "டிரான்சாக்ஷன்", t("app_transactions").toLowerCase()] },
+      { to: "/invoices", words: ["invoice", "invoices", "bill", "bills", "vilaippattiyal", "vilaippattiyalgal", "பட்டியல்", "பட்டியல்கள்", "இன்வாய்ஸ்", "பில்", t("app_invoices").toLowerCase()] },
+      { to: "/reports", words: ["report", "reports", "chart", "charts", "arikkai", "arikkaigal", "அறிக்கை", "அறிக்கைகள்", "ரிப்போர்ட்", t("app_reports").toLowerCase()] },
       { to: "/budget", words: ["budget", "budgets", "badjet", "பட்ஜெட்", t("app_budget").toLowerCase()] },
-      { to: "/investment", words: ["investment", "investments", "mudhaleedu", "nivesh", "முதலீடு", t("app_investment").toLowerCase()] },
-      { to: "/schemes", words: ["scheme", "schemes", "government scheme", "thittangal", "thittam", "yojana", "yojanayein", "திட்டம்", "திட்டங்கள்", t("app_schemes").toLowerCase()] },
-      { to: "/regulatory", words: ["regulatory", "regulation", "regulations", "update", "ozhungumurai", "niyamak", "ஒழுங்குமுறை", t("app_regulatory").toLowerCase()] },
-      { to: "/calculator", words: ["calculator", "calculators", "kanippori", "kanippan", "கணிப்பொறி", t("app_calculator").toLowerCase()] },
-      { to: "/settings", words: ["setting", "settings", "profile", "amaippu", "amaippukal", "amaippugal", "அமைப்பு", "அமைப்புகள்", t("app_settings").toLowerCase()] },
-      { to: "/notifications", words: ["notification", "notifications", "alert", "alerts", "arivippu", "arivippukal", "arivippugal", "suchna", "அறிவிப்பு", "அறிவிப்புகள்", t("app_notifications").toLowerCase()] },
+      { to: "/investment", words: ["investment", "investments", "mudhaleedu", "nivesh", "முதலீடு", "இன்வெஸ்ட்மென்ட்", t("app_investment").toLowerCase()] },
+      { to: "/schemes", words: ["scheme", "schemes", "government scheme", "thittangal", "thittam", "yojana", "yojanayein", "திட்டம்", "திட்டங்கள்", "ஸ்கீம்", t("app_schemes").toLowerCase()] },
+      { to: "/regulatory", words: ["regulatory", "regulation", "regulations", "update", "ozhungumurai", "niyamak", "ஒழுங்குமுறை", "ரெகுலேட்டரி", t("app_regulatory").toLowerCase()] },
+      { to: "/calculator", words: ["calculator", "calculators", "kanippori", "kanippan", "கணிப்பொறி", "கால்குலேட்டர்", t("app_calculator").toLowerCase()] },
+      { to: "/settings", words: ["setting", "settings", "profile", "amaippu", "amaippukal", "amaippugal", "அமைப்பு", "அமைப்புகள்", "செட்டிங்ஸ்", "புரொபைல்", t("app_settings").toLowerCase()] },
+      { to: "/notifications", words: ["notification", "notifications", "alert", "alerts", "arivippu", "arivippukal", "arivippugal", "suchna", "அறிவிப்பு", "அறிவிப்புகள்", "நோட்டிபிகேஷன்", t("app_notifications").toLowerCase()] },
     ];
 
-    // Navigation keywords in multiple languages: open, go to, show, kholo, dikhao, thira, kaatu
-    const navKeywords = ["open", "go to", "show", "kholo", "dikhao", "திற", "காட்டு", "செய்", "thira", "kaatu", "pannu", "sei"];
+    // Navigation keywords in multiple languages: open, go to, show, kholo, dikhao, thira, kaatu, etc.
+    const navKeywords = ["open", "go to", "show", "kholo", "dikhao", "திற", "காட்டு", "செய்", "ஓபன்", "பண்ணு", "போ", "பார்", "thira", "kaatu", "pannu", "sei"];
     const isNavCommand = navKeywords.some(k => lower.includes(k));
 
     for (const route of dynamicRoutes) {
