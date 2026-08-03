@@ -207,6 +207,9 @@ export function GlobalVoiceListener() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && speaking) {
+         stopAudio();
+      }
       if (e.ctrlKey && e.altKey && !listening && !e.repeat) {
          if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
            e.preventDefault();
@@ -226,10 +229,19 @@ export function GlobalVoiceListener() {
        window.removeEventListener("keydown", handleKeyDown, { capture: true });
        window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [listening, toggleVoice]);
+  }, [listening, speaking, toggleVoice, stopAudio]);
 
   return (
     <div className="fixed bottom-4 left-4 z-50 md:bottom-6 md:left-6 flex flex-col items-center gap-2">
+      {speaking && (
+        <button
+          onClick={stopAudio}
+          className="grid h-10 w-10 place-items-center rounded-full bg-slate-800 text-white shadow-lg hover:bg-slate-700 transition-colors"
+          aria-label="Stop speaking"
+        >
+          <Square className="h-4 w-4 fill-current" />
+        </button>
+      )}
       {listening && (
          <div className="rounded-full bg-red-500 text-white px-3 py-1 text-xs font-medium animate-pulse shadow-lg">
             Listening...
