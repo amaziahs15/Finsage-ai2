@@ -266,7 +266,7 @@ export function GlobalVoiceListener() {
   }, [listening, speaking, toggleVoice, stopAudio]);
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 md:bottom-6 md:left-6 flex flex-col items-center gap-2">
+    <div className="fixed bottom-4 right-20 z-50 md:bottom-6 md:right-24 flex flex-col items-center gap-2">
       {speaking && (
         <button
           onClick={stopAudio}
