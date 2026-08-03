@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Send, Mic, Paperclip, Plus, Sparkles, ExternalLink, ShieldCheck, Volume2, Loader2, Square, Copy } from "lucide-react";
+import { Send, Mic, Paperclip, Plus, Sparkles, ExternalLink, ShieldCheck, Volume2, Loader2, Square, Copy, Edit2, Trash2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { FlowchartRenderer } from "@/components/flowchart-renderer";
@@ -115,6 +115,25 @@ function ChatPage() {
     }
   }
 
+  async function deleteChat(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!confirm(t("Are you sure you want to delete this chat?"))) return;
+    await supabase.from("chat_conversations").delete().eq("id", id);
+    if (activeId === id) {
+      setActiveId(null);
+      setMessages([]);
+    }
+    await loadConvos();
+  }
+
+  async function renameChat(id: string, current: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    const newTitle = prompt(t("Enter new title:"), current);
+    if (!newTitle || newTitle === current) return;
+    await supabase.from("chat_conversations").update({ title: newTitle }).eq("id", id);
+    await loadConvos();
+  }
+
   async function ensureConvo(): Promise<string | null> {
     if (activeId) return activeId;
     const { data: u } = await supabase.auth.getUser();
@@ -184,6 +203,11 @@ function ChatPage() {
     }
   }
 
+  function handleEditMessage(m: Msg) {
+    setInput(m.content);
+    inputRef.current?.focus();
+  }
+
   function toggleVoice() {
     const w = window as unknown as { SpeechRecognition?: SpeechRecognitionCtor; webkitSpeechRecognition?: SpeechRecognitionCtor };
     const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
@@ -229,13 +253,22 @@ function ChatPage() {
         <div className="flex-1 overflow-y-auto p-2">
           <p className="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("chat_history")}</p>
           {convos.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => { setActiveId(c.id); loadMessages(c.id); }}
-              className={`w-full text-left rounded-lg px-3 py-2 text-sm truncate transition-colors ${activeId === c.id ? "bg-teal/10 text-navy font-medium" : "text-muted-foreground hover:bg-muted"}`}
-            >
-              {c.title || "New chat"}
-            </button>
+            <div key={c.id} className="group relative">
+              <button
+                onClick={() => { setActiveId(c.id); loadMessages(c.id); }}
+                className={`w-full text-left rounded-lg px-3 py-2 text-sm truncate transition-colors pr-12 ${activeId === c.id ? "bg-teal/10 text-navy font-medium" : "text-muted-foreground hover:bg-muted"}`}
+              >
+                {c.title || "New chat"}
+              </button>
+              <div className="absolute right-1 top-1.5 hidden group-hover:flex items-center gap-0.5 bg-card rounded-md shadow-sm border border-border p-0.5">
+                <button onClick={(e) => renameChat(c.id, c.title, e)} className="p-1 text-muted-foreground hover:text-navy hover:bg-muted rounded" title="Rename">
+                  <Edit2 className="h-3 w-3" />
+                </button>
+                <button onClick={(e) => deleteChat(c.id, e)} className="p-1 text-muted-foreground hover:text-red-500 hover:bg-muted rounded" title="Delete">
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       </aside>
@@ -273,6 +306,7 @@ function ChatPage() {
                 speakingId={speakingId}
                 loadingAudioId={loadingAudioId}
                 onSpeak={speak}
+                onEdit={handleEditMessage}
               />
             ))}
           </div>
@@ -317,11 +351,12 @@ function ChatPage() {
   );
 }
 
-function MessageBubble({ m, speakingId, loadingAudioId, onSpeak }: {
+function MessageBubble({ m, speakingId, loadingAudioId, onSpeak, onEdit }: {
   m: Msg;
   speakingId: string | null;
   loadingAudioId: string | null;
   onSpeak: (id: string, text: string) => void;
+  onEdit: (m: Msg) => void;
 }) {
   const { t } = useI18n();
   const isUser = m.role === "user";
@@ -329,9 +364,19 @@ function MessageBubble({ m, speakingId, loadingAudioId, onSpeak }: {
   const isLoadingAudio = loadingAudioId === m.id;
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-      <div className={`max-w-[85%] ${isUser ? "bg-navy text-white rounded-2xl rounded-br-md px-4 py-3" : ""}`}>
+      <div className={`max-w-[85%] ${isUser ? "bg-navy text-white rounded-2xl rounded-br-md px-4 py-3 group relative" : ""}`}>
         {isUser ? (
-          <div className="whitespace-pre-wrap text-sm">{m.content}</div>
+          <>
+            <div className="whitespace-pre-wrap text-sm">{m.content}</div>
+            <div className="absolute right-full top-0 mr-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-card rounded-md shadow-sm border border-border p-0.5">
+              <button onClick={() => navigator.clipboard.writeText(m.content)} className="p-1 text-muted-foreground hover:text-navy hover:bg-muted rounded" title="Copy">
+                <Copy className="h-3 w-3" />
+              </button>
+              <button onClick={() => onEdit(m)} className="p-1 text-muted-foreground hover:text-teal hover:bg-muted rounded" title="Edit">
+                <Edit2 className="h-3 w-3" />
+              </button>
+            </div>
+          </>
         ) : (
           <div>
             <div className="prose prose-sm dark:prose-invert max-w-none text-foreground prose-pre:bg-muted prose-pre:text-foreground prose-code:text-teal prose-a:text-teal prose-table:text-sm prose-th:bg-muted">
