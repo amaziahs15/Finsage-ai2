@@ -2,10 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Send, Mic, Paperclip, Plus, Sparkles, ExternalLink, ShieldCheck, Volume2, Loader2, Square, Copy, Edit2, Trash2 } from "lucide-react";
+import { Send, Mic, Paperclip, Plus, Sparkles, ExternalLink, ShieldCheck, Volume2, Loader2, Square, Copy, Edit2, Trash2, MoreVertical } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { FlowchartRenderer } from "@/components/flowchart-renderer";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/_authenticated/chat")({
   head: () => ({ meta: [{ title: "Ask FinSage AI" }, { name: "robots", content: "noindex" }] }),
@@ -253,20 +254,30 @@ function ChatPage() {
         <div className="flex-1 overflow-y-auto p-2">
           <p className="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("chat_history")}</p>
           {convos.map((c) => (
-            <div key={c.id} className="group relative">
+            <div key={c.id} className="group relative flex items-center">
               <button
                 onClick={() => { setActiveId(c.id); loadMessages(c.id); }}
-                className={`w-full text-left rounded-lg px-3 py-2 text-sm truncate transition-colors pr-12 ${activeId === c.id ? "bg-teal/10 text-navy font-medium" : "text-muted-foreground hover:bg-muted"}`}
+                className={`flex-1 text-left rounded-lg px-3 py-2 text-sm truncate transition-colors pr-8 ${activeId === c.id ? "bg-teal/10 text-navy font-medium" : "text-muted-foreground hover:bg-muted"}`}
               >
                 {c.title || "New chat"}
               </button>
-              <div className="absolute right-1 top-1.5 hidden group-hover:flex items-center gap-0.5 bg-card rounded-md shadow-sm border border-border p-0.5">
-                <button onClick={(e) => renameChat(c.id, c.title, e)} className="p-1 text-muted-foreground hover:text-navy hover:bg-muted rounded" title="Rename">
-                  <Edit2 className="h-3 w-3" />
-                </button>
-                <button onClick={(e) => deleteChat(c.id, e)} className="p-1 text-muted-foreground hover:text-red-500 hover:bg-muted rounded" title="Delete">
-                  <Trash2 className="h-3 w-3" />
-                </button>
+              
+              <div className="absolute right-1">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="p-1.5 text-muted-foreground hover:text-navy hover:bg-muted rounded-md transition-colors" title="Options">
+                      <MoreVertical className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-32">
+                    <DropdownMenuItem onClick={(e) => renameChat(c.id, c.title, e as any)} className="cursor-pointer flex items-center gap-2">
+                      <Edit2 className="h-3.5 w-3.5" /> Rename
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => deleteChat(c.id, e as any)} className="cursor-pointer text-red-600 focus:text-red-600 flex items-center gap-2">
+                      <Trash2 className="h-3.5 w-3.5" /> Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           ))}
