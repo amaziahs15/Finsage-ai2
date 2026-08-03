@@ -90,25 +90,25 @@ export function GlobalVoiceListener() {
        return;
     }
 
-    // Dynamic nav routes including localized strings
+    // Dynamic nav routes including localized strings and common transliterations
     const dynamicRoutes = [
-      { to: "/dashboard", words: ["dashboard", t("app_dashboard").toLowerCase()] },
-      { to: "/chat", words: ["chat", "assistant", "ai", t("app_chat").toLowerCase()] },
-      { to: "/compliance", words: ["compliance", "compliances", "deadline", "deadlines", t("app_compliance").toLowerCase()] },
-      { to: "/transactions", words: ["transaction", "transactions", t("app_transactions").toLowerCase()] },
-      { to: "/invoices", words: ["invoice", "invoices", "bill", "bills", t("app_invoices").toLowerCase()] },
-      { to: "/reports", words: ["report", "reports", "chart", "charts", t("app_reports").toLowerCase()] },
-      { to: "/budget", words: ["budget", "budgets", t("app_budget").toLowerCase()] },
-      { to: "/investment", words: ["investment", "investments", t("app_investment").toLowerCase()] },
-      { to: "/schemes", words: ["scheme", "schemes", "government scheme", t("app_schemes").toLowerCase()] },
-      { to: "/regulatory", words: ["regulatory", "regulation", "regulations", "update", t("app_regulatory").toLowerCase()] },
-      { to: "/calculator", words: ["calculator", "calculators", t("app_calculator").toLowerCase()] },
-      { to: "/settings", words: ["setting", "settings", "profile", t("app_settings").toLowerCase()] },
-      { to: "/notifications", words: ["notification", "notifications", "alert", "alerts", t("app_notifications").toLowerCase()] },
+      { to: "/dashboard", words: ["dashboard", "overview", "டேஷ்போர்டு", "கண்ணோட்டம்", t("app_dashboard").toLowerCase()] },
+      { to: "/chat", words: ["chat", "assistant", "ai", "உதவியாளர்", t("app_chat").toLowerCase()] },
+      { to: "/compliance", words: ["compliance", "compliances", "deadline", "deadlines", "inakkam", "anupalan", "இணக்கம்", t("app_compliance").toLowerCase()] },
+      { to: "/transactions", words: ["transaction", "transactions", "parivarthanai", "parivarthanaigal", "len-den", "lenden", "பரிவர்த்தனை", "பரிவர்த்தனைகள்", t("app_transactions").toLowerCase()] },
+      { to: "/invoices", words: ["invoice", "invoices", "bill", "bills", "vilaippattiyal", "vilaippattiyalgal", "பட்டியல்", "பட்டியல்கள்", t("app_invoices").toLowerCase()] },
+      { to: "/reports", words: ["report", "reports", "chart", "charts", "arikkai", "arikkaigal", "அறிக்கை", "அறிக்கைகள்", t("app_reports").toLowerCase()] },
+      { to: "/budget", words: ["budget", "budgets", "badjet", "பட்ஜெட்", t("app_budget").toLowerCase()] },
+      { to: "/investment", words: ["investment", "investments", "mudhaleedu", "nivesh", "முதலீடு", t("app_investment").toLowerCase()] },
+      { to: "/schemes", words: ["scheme", "schemes", "government scheme", "thittangal", "thittam", "yojana", "yojanayein", "திட்டம்", "திட்டங்கள்", t("app_schemes").toLowerCase()] },
+      { to: "/regulatory", words: ["regulatory", "regulation", "regulations", "update", "ozhungumurai", "niyamak", "ஒழுங்குமுறை", t("app_regulatory").toLowerCase()] },
+      { to: "/calculator", words: ["calculator", "calculators", "kanippori", "kanippan", "கணிப்பொறி", t("app_calculator").toLowerCase()] },
+      { to: "/settings", words: ["setting", "settings", "profile", "amaippu", "amaippukal", "amaippugal", "அமைப்பு", "அமைப்புகள்", t("app_settings").toLowerCase()] },
+      { to: "/notifications", words: ["notification", "notifications", "alert", "alerts", "arivippu", "arivippukal", "arivippugal", "suchna", "அறிவிப்பு", "அறிவிப்புகள்", t("app_notifications").toLowerCase()] },
     ];
 
     // Navigation keywords in multiple languages: open, go to, show, kholo, dikhao, thira, kaatu
-    const navKeywords = ["open", "go to", "show", "kholo", "dikhao", "திற", "காட்டு", "thira"];
+    const navKeywords = ["open", "go to", "show", "kholo", "dikhao", "திற", "காட்டு", "செய்", "thira", "kaatu", "pannu", "sei"];
     const isNavCommand = navKeywords.some(k => lower.includes(k));
 
     for (const route of dynamicRoutes) {
