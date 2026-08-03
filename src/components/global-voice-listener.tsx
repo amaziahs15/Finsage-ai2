@@ -217,6 +217,8 @@ export function GlobalVoiceListener() {
        return; 
     }
     
+    stopAudio(); // Stop any currently playing AI response before listening
+    
     const rec = new SR();
     rec.lang = lang === "hi" ? "hi-IN" : lang === "ta" ? "ta-IN" : "en-IN";
     rec.continuous = false;
