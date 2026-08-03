@@ -54,6 +54,7 @@ export function GlobalVoiceListener() {
 
   const processCommand = async (text: string) => {
     const lower = text.toLowerCase().trim();
+    const strippedLower = lower.replace(/\s+/g, "");
     if (!lower) {
       speak("Sorry, I didn't catch that — try again.");
       return;
@@ -90,32 +91,31 @@ export function GlobalVoiceListener() {
        return;
     }
 
-    // Dynamic nav routes including localized strings and common transliterations
     // Dynamic nav routes including localized strings, common transliterations, and Tamil-script transliterations of English words
     const dynamicRoutes = [
       { to: "/dashboard", words: ["dashboard", "overview", "டேஷ்போர்டு", "கண்ணோட்டம்", "dash", t("app_dashboard").toLowerCase()] },
       { to: "/chat", words: ["chat", "assistant", "ai", "உதவியாளர்", "சாட்", "uraiyadal", t("app_chat").toLowerCase()] },
       { to: "/compliance", words: ["compliance", "deadline", "inakkam", "inakam", "anupalan", "இணக்கம்", "கம்ப்ளையன்ஸ்", t("app_compliance").toLowerCase()] },
       { to: "/transactions", words: ["transaction", "parivarthan", "parivartan", "lenden", "len-den", "பரிவர்த்தனை", "டிரான்சாக்ஷன்", t("app_transactions").toLowerCase()] },
-      { to: "/invoices", words: ["invoice", "bill", "vilaippat", "vilaipat", "பட்டியல்", "இன்வாய்ஸ்", t("app_invoices").toLowerCase()] },
+      { to: "/invoices", words: ["invoice", "bill", "vilaippat", "vilaipat", "villapat", "பட்டியல்", "இன்வாய்ஸ்", t("app_invoices").toLowerCase()] },
       { to: "/reports", words: ["report", "chart", "arikkai", "arikai", "அறிக்கை", "ரிப்போர்ட்", t("app_reports").toLowerCase()] },
       { to: "/budget", words: ["budget", "badjet", "பட்ஜெட்", t("app_budget").toLowerCase()] },
-      { to: "/investment", words: ["investment", "mudhaleed", "muthaleed", "nivesh", "முதலீடு", "இன்வெஸ்ட்மென்ட்", t("app_investment").toLowerCase()] },
+      { to: "/investment", words: ["investment", "mudhaleed", "muthaleed", "motherleed", "nivesh", "முதலீடு", "இன்வெஸ்ட்மென்ட்", t("app_investment").toLowerCase()] },
       { to: "/schemes", words: ["scheme", "government scheme", "thittang", "thitang", "thittam", "thitam", "yojana", "திட்டம்", "ஸ்கீம்", t("app_schemes").toLowerCase()] },
       { to: "/regulatory", words: ["regulatory", "regulation", "update", "ozhungumurai", "olungumurai", "niyamak", "ஒழுங்குமுறை", "ரெகுலேட்டரி", t("app_regulatory").toLowerCase()] },
-      { to: "/calculator", words: ["calculator", "kanippori", "kanipori", "kanippan", "கணிப்பொறி", "கால்குலேட்டர்", t("app_calculator").toLowerCase()] },
+      { to: "/calculator", words: ["calculator", "kanippori", "kanipori", "canipori", "kanippan", "கணிப்பொறி", "கால்குலேட்டர்", t("app_calculator").toLowerCase()] },
       { to: "/settings", words: ["setting", "profile", "amaippu", "amaipu", "அமைப்பு", "செட்டிங்ஸ்", "புரொபைல்", t("app_settings").toLowerCase()] },
       { to: "/notifications", words: ["notification", "alert", "arivippu", "arivipu", "suchna", "அறிவிப்பு", "நோட்டிபிகேஷன்", t("app_notifications").toLowerCase()] },
     ];
 
     // Navigation keywords in multiple languages: open, go to, show, kholo, dikhao, thira, kaatu, etc.
     const navKeywords = ["open", "go to", "show", "kholo", "dikhao", "திற", "காட்டு", "செய்", "ஓபன்", "பண்ணு", "போ", "பார்", "thira", "kaatu", "pannu", "sei", "say"];
-    const isNavCommand = navKeywords.some(k => lower.includes(k));
+    const isNavCommand = navKeywords.some(k => lower.includes(k) || strippedLower.includes(k));
     const isShortCommand = lower.split(/\s+/).length <= 4;
 
     for (const route of dynamicRoutes) {
-      if (route.words.some(w => lower.includes(w))) {
-        if (isNavCommand || isShortCommand || route.words.some(w => lower === w)) {
+      if (route.words.some(w => lower.includes(w) || strippedLower.includes(w))) {
+        if (isNavCommand || isShortCommand || route.words.some(w => lower === w || strippedLower === w)) {
           speak(lang === "ta" ? "திறக்கிறேன்" : lang === "hi" ? "खोल रहा हूँ" : `Opening ${route.words[0]}`);
           navigate({ to: route.to });
           return;
