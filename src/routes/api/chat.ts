@@ -78,7 +78,8 @@ type ChatBody = {
   conversation_id: string;
   message: string;
   language?: "en" | "hi" | "ta";
-  page_context?: string; // optional hint about which page the widget was opened on
+  page_context?: string;
+  is_voice_command?: boolean;
 };
 
 const SYSTEM_PROMPT = `You are FinSage AI, a dedicated financial copilot built exclusively for Indian small business owners, shopkeepers, freelancers, and MSMEs.
@@ -355,6 +356,7 @@ ${regLines.length ? regLines.join("\n") : "  (none published yet)"}
 When the user's question is about their own finances, invoices, receivables, budgets, spending, or personal compliance deadlines, USE the numbers above. For regulatory questions, prefer the Regulatory Updates listed above when they match; otherwise answer from general compliance knowledge with official sources. You can freely mix both in one conversation.`;
 
         const pageHint = body.page_context ? `\n\nThe user is currently on the "${body.page_context}" page.` : "";
+        const voiceHint = body.is_voice_command ? `\n\nVOICE COMMAND DETECTED: If the user is asking to navigate to a page, open a section, or go somewhere (e.g. "transactionai open sei", "schemes kholo", "open settings"), you MUST reply with EXACTLY this string and nothing else: NAVIGATE_TO:/path (replace /path with the correct page: /dashboard, /chat, /compliance, /transactions, /invoices, /reports, /budget, /investment, /schemes, /regulatory, /calculator, /settings, /notifications). Do not add any conversational text if navigating. If they are asking a finance question, answer normally in their language.` : "";
 
         // Fetch real-time official government website content (RAG)
         const { context: govContext, sources: govSources } = await fetchRelevantGovContext(body.message);
@@ -363,7 +365,7 @@ When the user's question is about their own finances, invoices, receivables, bud
           : "";
 
         const messages = [
-          { role: "system", content: SYSTEM_PROMPT + langInstr + userContext + pageHint + govBlock },
+          { role: "system", content: SYSTEM_PROMPT + langInstr + userContext + pageHint + voiceHint + govBlock },
           ...((history ?? []) as { role: string; content: string }[]).map((m) => ({ role: m.role, content: m.content })),
           { role: "user", content: body.message },
         ];

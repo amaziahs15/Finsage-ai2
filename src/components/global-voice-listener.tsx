@@ -147,7 +147,7 @@ export function GlobalVoiceListener() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ conversation_id: cid, message: text, language: lang }),
+        body: JSON.stringify({ conversation_id: cid, message: text, language: lang, is_voice_command: true }),
       });
 
       if (!res.ok) {
@@ -171,8 +171,19 @@ export function GlobalVoiceListener() {
                 const json = JSON.parse(line.slice(5).trim());
                 if (json.type === "delta") {
                    acc += json.text;
+                   // Fast-path for AI-detected navigation
+                   if (acc.startsWith("NAVIGATE_TO:")) {
+                      const targetRoute = acc.split(":")[1].trim();
+                      if (targetRoute && targetRoute.startsWith("/")) {
+                         speak(lang === "ta" ? "திறக்கிறேன்" : lang === "hi" ? "खोल रहा हूँ" : `Opening ${targetRoute.slice(1)}`);
+                         navigate({ to: targetRoute });
+                         return; // Stop processing stream
+                      }
+                   }
                 } else if (json.type === "done") {
-                   speak(acc);
+                   if (!acc.startsWith("NAVIGATE_TO:")) {
+                     speak(acc);
+                   }
                    return;
                 }
              } catch {}
