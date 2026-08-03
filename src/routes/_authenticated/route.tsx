@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar, MobileTopBar } from "@/components/app-sidebar";
 import { ChatWidget } from "@/components/chat-widget";
+import { GlobalVoiceListener } from "@/components/global-voice-listener";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -22,6 +23,7 @@ function Layout() {
         <Outlet />
       </div>
       <ChatWidget />
+      <GlobalVoiceListener />
     </div>
   );
 }

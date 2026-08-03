@@ -11,6 +11,8 @@ export const toggleDemoMode = createServerFn({ method: "POST" })
     if (!data.enable) {
       await supabase.from("transactions").delete().eq("user_id", userId).eq("is_demo", true);
       await supabase.from("compliance_deadlines").delete().eq("user_id", userId).eq("is_demo", true);
+      await supabase.from("budgets").delete().eq("user_id", userId).eq("is_demo", true);
+      await supabase.from("invoices").delete().eq("user_id", userId).eq("is_demo", true);
       await supabase.from("profiles").update({ demo_mode: false, financial_health_score: null }).eq("user_id", userId);
       return { ok: true, enabled: false };
     }
@@ -18,6 +20,8 @@ export const toggleDemoMode = createServerFn({ method: "POST" })
     // clear previous demo rows
     await supabase.from("transactions").delete().eq("user_id", userId).eq("is_demo", true);
     await supabase.from("compliance_deadlines").delete().eq("user_id", userId).eq("is_demo", true);
+    await supabase.from("budgets").delete().eq("user_id", userId).eq("is_demo", true);
+    await supabase.from("invoices").delete().eq("user_id", userId).eq("is_demo", true);
 
     const today = new Date();
     const day = (offset: number) => {
@@ -47,9 +51,32 @@ export const toggleDemoMode = createServerFn({ method: "POST" })
       { kind: "GST", title: "GSTR-3B (prev month)", description: "Missed filing", due_date: day(-3), status: "overdue" },
     ].map((d) => ({ ...d, user_id: userId, is_demo: true }));
 
+    const budgets = [
+      { category: "Rent", monthly_limit: 25000 }, // Exceeded! (Spent 28000)
+      { category: "Utilities", monthly_limit: 15000 },
+      { category: "Inventory", monthly_limit: 40000 },
+      { category: "Salary", monthly_limit: 10000 },
+      { category: "Transport", monthly_limit: 8000 }
+    ].map((b) => ({ ...b, user_id: userId, is_demo: true }));
+
+    const invoices = [
+      { invoice_number: "INV-001", customer_name: "Acme Corp", taxable_amount: 145000, total_amount: 145000, amount_paid: 145000, status: "paid", due_date: day(-10) },
+      { invoice_number: "INV-002", customer_name: "Kirti Traders", taxable_amount: 100000, total_amount: 100000, amount_paid: 62000, status: "partially_paid", due_date: day(5) },
+      { invoice_number: "INV-003", customer_name: "Global Tech", taxable_amount: 45000, total_amount: 45000, amount_paid: 0, status: "overdue", due_date: day(-5) }
+    ].map((i) => ({ ...i, user_id: userId, is_demo: true }));
+
     await supabase.from("transactions").insert(txns);
     await supabase.from("compliance_deadlines").insert(deadlines);
-    await supabase.from("profiles").update({ demo_mode: true, financial_health_score: 78 }).eq("user_id", userId);
+    await supabase.from("budgets").insert(budgets);
+    await supabase.from("invoices").insert(invoices);
+    
+    await supabase.from("profiles").update({ 
+      demo_mode: true, 
+      financial_health_score: 78,
+      business_type: "Private Limited Company",
+      employee_count: "10-50",
+      state: "Maharashtra"
+    }).eq("user_id", userId);
 
     return { ok: true, enabled: true };
   });

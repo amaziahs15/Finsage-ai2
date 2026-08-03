@@ -19,6 +19,7 @@ export type Database = {
           category: string
           created_at: string
           id: string
+          is_demo: boolean
           monthly_limit: number
           user_id: string
         }
@@ -26,6 +27,7 @@ export type Database = {
           category: string
           created_at?: string
           id?: string
+          is_demo?: boolean
           monthly_limit: number
           user_id: string
         }
@@ -33,6 +35,7 @@ export type Database = {
           category?: string
           created_at?: string
           id?: string
+          is_demo?: boolean
           monthly_limit?: number
           user_id?: string
         }
@@ -226,6 +229,7 @@ export type Database = {
           id: string
           igst_amount: number
           invoice_number: string
+          is_demo: boolean
           payment_terms: string | null
           sgst_amount: number
           status: string
@@ -248,6 +252,7 @@ export type Database = {
           id?: string
           igst_amount?: number
           invoice_number: string
+          is_demo?: boolean
           payment_terms?: string | null
           sgst_amount?: number
           status?: string
@@ -270,6 +275,7 @@ export type Database = {
           id?: string
           igst_amount?: number
           invoice_number?: string
+          is_demo?: boolean
           payment_terms?: string | null
           sgst_amount?: number
           status?: string

@@ -1,0 +1,2 @@
+ALTER TABLE public.budgets ADD COLUMN is_demo BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE public.invoices ADD COLUMN is_demo BOOLEAN NOT NULL DEFAULT false;

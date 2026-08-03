@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+// @ts-ignore
 import mermaid from "mermaid";
 
 mermaid.initialize({
@@ -31,14 +32,14 @@ export function MermaidChart({ code }: { code: string }) {
     setError(null);
     mermaid
       .render(id, code.trim())
-      .then(({ svg: out }) => {
+      .then(({ svg: out }: any) => {
         // Make SVG responsive
         const responsive = out
           .replace(/height="[^"]*"/, "")
           .replace(/<svg /, '<svg style="max-width:100%;height:auto;" ');
         setSvg(responsive);
       })
-      .catch((err) => {
+      .catch((err: any) => {
         setError(String(err?.message ?? err));
       });
   }, [code]);
