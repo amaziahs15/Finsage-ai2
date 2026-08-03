@@ -109,12 +109,13 @@ export function GlobalVoiceListener() {
     ];
 
     // Navigation keywords in multiple languages: open, go to, show, kholo, dikhao, thira, kaatu, etc.
-    const navKeywords = ["open", "go to", "show", "kholo", "dikhao", "திற", "காட்டு", "செய்", "ஓபன்", "பண்ணு", "போ", "பார்", "thira", "kaatu", "pannu", "sei"];
+    const navKeywords = ["open", "go to", "show", "kholo", "dikhao", "திற", "காட்டு", "செய்", "ஓபன்", "பண்ணு", "போ", "பார்", "thira", "kaatu", "pannu", "sei", "say"];
     const isNavCommand = navKeywords.some(k => lower.includes(k));
+    const isShortCommand = lower.split(/\s+/).length <= 4;
 
     for (const route of dynamicRoutes) {
       if (route.words.some(w => lower.includes(w))) {
-        if (isNavCommand || route.words.some(w => lower === w)) {
+        if (isNavCommand || isShortCommand || route.words.some(w => lower === w)) {
           speak(lang === "ta" ? "திறக்கிறேன்" : lang === "hi" ? "खोल रहा हूँ" : `Opening ${route.words[0]}`);
           navigate({ to: route.to });
           return;
