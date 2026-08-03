@@ -38,7 +38,7 @@ function Res({ children }: { children: React.ReactNode }) {
 }
 
 function GSTCalc() {
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState("10000");
   const [rate, setRate] = useState("18");
   const [mode, setMode] = useState<"ex" | "in">("ex");
   const amt = parseFloat(amount) || 0;
@@ -68,7 +68,7 @@ function GSTCalc() {
 }
 
 function EMICalc() {
-  const [p, setP] = useState(""), [rate, setRate] = useState(""), [months, setMonths] = useState("");
+  const [p, setP] = useState("500000"), [rate, setRate] = useState("10.5"), [months, setMonths] = useState("36");
   const P = parseFloat(p) || 0, r = parseFloat(rate) || 0, n = parseFloat(months) || 0;
   const mr = r / 12 / 100;
   const emi = P && r && n ? P * mr * Math.pow(1 + mr, n) / (Math.pow(1 + mr, n) - 1) : 0;
@@ -92,7 +92,7 @@ function TDSCalc() {
     { l: "194I – Rent (Land/Building)", r: 10 }, { l: "194I – Rent (Plant/Machinery)", r: 2 },
     { l: "194A – Interest (Bank)", r: 10 }, { l: "194D – Insurance Commission", r: 5 },
   ];
-  const [amt, setAmt] = useState(""), [si, setSi] = useState(0);
+  const [amt, setAmt] = useState("50000"), [si, setSi] = useState(0);
   const a = parseFloat(amt) || 0, rate = SECS[si].r, tds = a * rate / 100, net = a - tds;
   return (
     <div>
@@ -106,7 +106,7 @@ function TDSCalc() {
 }
 
 function ProfitCalc() {
-  const [rev, setRev] = useState(""), [cogs, setCogs] = useState(""), [exp, setExp] = useState(""), [tax, setTax] = useState("25");
+  const [rev, setRev] = useState("1000000"), [cogs, setCogs] = useState("400000"), [exp, setExp] = useState("200000"), [tax, setTax] = useState("25");
   const R = parseFloat(rev) || 0, C = parseFloat(cogs) || 0, E = parseFloat(exp) || 0, T = parseFloat(tax) || 0;
   const gross = R - C, gm = R ? gross / R * 100 : 0, ebit = gross - E, taxAmt = ebit > 0 ? ebit * T / 100 : 0, net = ebit - taxAmt, nm = R ? net / R * 100 : 0;
   return (
@@ -123,7 +123,7 @@ function ProfitCalc() {
 }
 
 function CompoundCalc() {
-  const [p, setP] = useState(""), [r, setR] = useState(""), [t, setT] = useState(""), [n, setN] = useState("12");
+  const [p, setP] = useState("100000"), [r, setR] = useState("7.5"), [t, setT] = useState("5"), [n, setN] = useState("12");
   const P = parseFloat(p) || 0, rate = parseFloat(r) || 0, yrs = parseFloat(t) || 0, freq = parseFloat(n) || 12;
   const A = P && rate && yrs ? P * Math.pow(1 + rate / (freq * 100), freq * yrs) : 0;
   const interest = A - P;

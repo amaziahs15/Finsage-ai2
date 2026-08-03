@@ -289,12 +289,7 @@ export const Route = createFileRoute("/api/chat")({
           language: body.language ?? "en",
         });
 
-        const langInstr =
-          body.language === "hi"
-            ? "\n\nRespond in हिन्दी (Hindi)."
-            : body.language === "ta"
-            ? "\n\nRespond in தமிழ் (Tamil)."
-            : "\n\nRespond in English.";
+        const langInstr = "\n\nIMPORTANT: Automatically detect the language of the user's message (English, Hindi, or Tamil). You MUST respond in the EXACT same language the user wrote/spoke in, regardless of any other settings.";
 
         // ---- Ground the model in the signed-in user's real data ----
         // Fetch a compact summary of their finances so the model can answer

@@ -20,24 +20,8 @@ interface SpeechRecognitionInstance {
 }
 type SpeechRecognitionCtor = new () => SpeechRecognitionInstance;
 
-const navRoutes = [
-  { to: "/dashboard", words: ["dashboard"] },
-  { to: "/chat", words: ["chat", "assistant", "ai"] },
-  { to: "/compliance", words: ["compliance", "compliances", "deadline", "deadlines"] },
-  { to: "/transactions", words: ["transaction", "transactions"] },
-  { to: "/invoices", words: ["invoice", "invoices", "bill", "bills"] },
-  { to: "/reports", words: ["report", "reports", "chart", "charts"] },
-  { to: "/budget", words: ["budget", "budgets"] },
-  { to: "/investment", words: ["investment", "investments"] },
-  { to: "/schemes", words: ["scheme", "schemes", "government scheme"] },
-  { to: "/regulatory", words: ["regulatory", "regulation", "regulations", "update"] },
-  { to: "/calculator", words: ["calculator", "calculators"] },
-  { to: "/settings", words: ["setting", "settings", "profile"] },
-  { to: "/notifications", words: ["notification", "notifications", "alert", "alerts"] },
-];
-
 export function GlobalVoiceListener() {
-  const { lang, t } = useI18n();
+  const { lang, setLang, t } = useI18n();
   const navigate = useNavigate();
   const toggleDemo = useServerFn(toggleDemoMode);
   const [listening, setListening] = useState(false);
@@ -75,6 +59,23 @@ export function GlobalVoiceListener() {
       return;
     }
 
+    // Language switching
+    if (lower.includes("change language to english") || lower.includes("english")) {
+      setLang("en");
+      speak("Language changed to English");
+      return;
+    }
+    if (lower.includes("change language to tamil") || lower.includes("தமிழ்") || lower.includes("tamil")) {
+      setLang("ta");
+      speak("மொழி தமிழுக்கு மாற்றப்பட்டது"); // Language changed to Tamil
+      return;
+    }
+    if (lower.includes("change language to hindi") || lower.includes("hindi") || lower.includes("हिंदी")) {
+      setLang("hi");
+      speak("भाषा हिंदी में बदल दी गई है"); // Language changed to Hindi
+      return;
+    }
+
     if (lower.includes("activate demo mode")) {
       speak("Demo mode activated");
       await toggleDemo({ data: { enable: true } });
@@ -89,14 +90,35 @@ export function GlobalVoiceListener() {
        return;
     }
 
-    if (lower.includes("open ")) {
-       for (const route of navRoutes) {
-          if (route.words.some(w => lower.includes(w))) {
-             speak(`Opening ${route.words[0]}`);
-             navigate({ to: route.to });
-             return;
-          }
-       }
+    // Dynamic nav routes including localized strings
+    const dynamicRoutes = [
+      { to: "/dashboard", words: ["dashboard", t("app_dashboard").toLowerCase()] },
+      { to: "/chat", words: ["chat", "assistant", "ai", t("app_chat").toLowerCase()] },
+      { to: "/compliance", words: ["compliance", "compliances", "deadline", "deadlines", t("app_compliance").toLowerCase()] },
+      { to: "/transactions", words: ["transaction", "transactions", t("app_transactions").toLowerCase()] },
+      { to: "/invoices", words: ["invoice", "invoices", "bill", "bills", t("app_invoices").toLowerCase()] },
+      { to: "/reports", words: ["report", "reports", "chart", "charts", t("app_reports").toLowerCase()] },
+      { to: "/budget", words: ["budget", "budgets", t("app_budget").toLowerCase()] },
+      { to: "/investment", words: ["investment", "investments", t("app_investment").toLowerCase()] },
+      { to: "/schemes", words: ["scheme", "schemes", "government scheme", t("app_schemes").toLowerCase()] },
+      { to: "/regulatory", words: ["regulatory", "regulation", "regulations", "update", t("app_regulatory").toLowerCase()] },
+      { to: "/calculator", words: ["calculator", "calculators", t("app_calculator").toLowerCase()] },
+      { to: "/settings", words: ["setting", "settings", "profile", t("app_settings").toLowerCase()] },
+      { to: "/notifications", words: ["notification", "notifications", "alert", "alerts", t("app_notifications").toLowerCase()] },
+    ];
+
+    // Navigation keywords in multiple languages: open, go to, show, kholo, dikhao, thira, kaatu
+    const navKeywords = ["open", "go to", "show", "kholo", "dikhao", "திற", "காட்டு", "thira"];
+    const isNavCommand = navKeywords.some(k => lower.includes(k));
+
+    for (const route of dynamicRoutes) {
+      if (route.words.some(w => lower.includes(w))) {
+        if (isNavCommand || route.words.some(w => lower === w)) {
+          speak(lang === "ta" ? "திறக்கிறேன்" : lang === "hi" ? "खोल रहा हूँ" : `Opening ${route.words[0]}`);
+          navigate({ to: route.to });
+          return;
+        }
+      }
     }
 
     speak("Let me check that for you...");
