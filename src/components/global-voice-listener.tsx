@@ -225,14 +225,13 @@ export function GlobalVoiceListener() {
       for (let i = e.resultIndex; i < e.results.length; i++) final += e.results[i][0].transcript;
       if (final.trim()) {
          processCommand(final);
-      } else {
-         speak("Sorry, I didn't catch that — try again.");
       }
     };
     rec.onend = () => setListening(false);
-    rec.onerror = () => {
+    rec.onerror = (e: any) => {
       setListening(false);
-      speak("Sorry, I didn't catch that — try again.");
+      if (e.error === "aborted" || e.error === "no-speech") return;
+      speak("Sorry, I didn't catch that.");
     };
     recognitionRef.current = rec;
     
