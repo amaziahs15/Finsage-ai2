@@ -51,6 +51,7 @@ function Dashboard() {
   }
 
   const income = txns.filter((x) => x.kind === "income").reduce((s, x) => s + Number(x.amount), 0);
+
   const expense = txns.filter((x) => x.kind === "expense").reduce((s, x) => s + Number(x.amount), 0);
   const net = income - expense;
   const health = profile?.financial_health_score ?? (txns.length ? Math.max(35, Math.min(95, Math.round(50 + (net / Math.max(income, 1)) * 50))) : null);
