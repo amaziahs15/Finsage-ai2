@@ -32,7 +32,8 @@ function BudgetPage() {
     const acc: Record<string, number> = {};
     for (const x of (tx as Txn[]) ?? []) {
       if (x.kind !== "expense" || !x.category) continue;
-      acc[x.category] = (acc[x.category] ?? 0) + Number(x.amount);
+      const cat = x.category.toLowerCase().trim();
+      acc[cat] = (acc[cat] ?? 0) + Number(x.amount);
     }
     setSpendByCat(acc);
   }, []);
@@ -79,7 +80,7 @@ function BudgetPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {items.map((b) => {
-            const spent = spendByCat[b.category] ?? 0;
+            const spent = spendByCat[b.category.toLowerCase().trim()] ?? 0;
             const pct = Math.min(200, Math.round((spent / Number(b.monthly_limit)) * 100));
             const over = spent > Number(b.monthly_limit);
             const warn = pct >= 80;

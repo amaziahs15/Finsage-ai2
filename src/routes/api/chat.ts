@@ -318,11 +318,12 @@ export const Route = createFileRoute("/api/chat")({
         const catSpend: Record<string, number> = {};
         for (const t of monthTxns) {
           if (t.kind !== "expense" || !t.category) continue;
-          catSpend[t.category] = (catSpend[t.category] ?? 0) + Number(t.amount);
+          const cat = t.category.toLowerCase().trim();
+          catSpend[cat] = (catSpend[cat] ?? 0) + Number(t.amount);
         }
         const topCats = Object.entries(catSpend).sort((a, b) => b[1] - a[1]).slice(0, 8);
         const budgetLines = budgets.map((b) => {
-          const spent = catSpend[b.category] ?? 0;
+          const spent = catSpend[b.category.toLowerCase().trim()] ?? 0;
           const pct = b.monthly_limit > 0 ? Math.round((spent / Number(b.monthly_limit)) * 100) : 0;
           return `  - ${b.category}: spent ₹${Math.round(spent).toLocaleString("en-IN")} of ₹${Math.round(Number(b.monthly_limit)).toLocaleString("en-IN")} (${pct}%)${spent > Number(b.monthly_limit) ? " — OVER BUDGET" : ""}`;
         });
