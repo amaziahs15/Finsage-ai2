@@ -21,18 +21,19 @@ interface SpeechRecognitionInstance {
 type SpeechRecognitionCtor = new () => SpeechRecognitionInstance;
 
 const navRoutes = [
-  { to: "/dashboard", word: "dashboard" },
-  { to: "/chat", word: "chat" },
-  { to: "/compliance", word: "compliance" },
-  { to: "/transactions", word: "transactions" },
-  { to: "/invoices", word: "invoices" },
-  { to: "/reports", word: "reports" },
-  { to: "/budget", word: "budget" },
-  { to: "/investment", word: "investment" },
-  { to: "/schemes", word: "schemes" },
-  { to: "/regulatory", word: "regulatory" },
-  { to: "/calculator", word: "calculator" },
-  { to: "/settings", word: "settings" },
+  { to: "/dashboard", words: ["dashboard"] },
+  { to: "/chat", words: ["chat", "assistant", "ai"] },
+  { to: "/compliance", words: ["compliance", "compliances", "deadline", "deadlines"] },
+  { to: "/transactions", words: ["transaction", "transactions"] },
+  { to: "/invoices", words: ["invoice", "invoices", "bill", "bills"] },
+  { to: "/reports", words: ["report", "reports", "chart", "charts"] },
+  { to: "/budget", words: ["budget", "budgets"] },
+  { to: "/investment", words: ["investment", "investments"] },
+  { to: "/schemes", words: ["scheme", "schemes", "government scheme"] },
+  { to: "/regulatory", words: ["regulatory", "regulation", "regulations", "update"] },
+  { to: "/calculator", words: ["calculator", "calculators"] },
+  { to: "/settings", words: ["setting", "settings", "profile"] },
+  { to: "/notifications", words: ["notification", "notifications", "alert", "alerts"] },
 ];
 
 export function GlobalVoiceListener() {
@@ -90,8 +91,8 @@ export function GlobalVoiceListener() {
 
     if (lower.includes("open ")) {
        for (const route of navRoutes) {
-          if (lower.includes(route.word)) {
-             speak(`Opening ${route.word}`);
+          if (route.words.some(w => lower.includes(w))) {
+             speak(`Opening ${route.words[0]}`);
              navigate({ to: route.to });
              return;
           }

@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, MessageSquare, CalendarCheck, Receipt, Settings, LogOut, Landmark, Wallet, TrendingUp, FileText, BarChart3, Scale, Calculator } from "lucide-react";
+import { LayoutDashboard, MessageSquare, CalendarCheck, Receipt, Settings, LogOut, Landmark, Wallet, TrendingUp, FileText, BarChart3, Scale, Calculator, Bell } from "lucide-react";
 import { LanguageSwitcher } from "@/components/marketing-chrome";
 
 const nav = [
@@ -17,6 +17,7 @@ const nav = [
   { to: "/schemes", icon: Landmark, key: "app_schemes" as const },
   { to: "/regulatory", icon: Scale, key: "app_regulatory" as const },
   { to: "/calculator", icon: Calculator, key: "app_calculator" as const },
+  { to: "/notifications", icon: Bell, key: "app_notifications" as const },
   { to: "/settings", icon: Settings, key: "app_settings" as const },
 ];
 
