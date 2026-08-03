@@ -33,7 +33,7 @@ function BudgetPage() {
     for (const x of (tx as Txn[]) ?? []) {
       if (x.kind !== "expense" || !x.category) continue;
       const cat = x.category.toLowerCase().trim();
-      acc[cat] = (acc[cat] ?? 0) + Number(x.amount);
+      acc[cat] = (acc[cat] ?? 0) + Math.abs(Number(x.amount));
     }
     setSpendByCat(acc);
   }, []);
@@ -42,7 +42,7 @@ function BudgetPage() {
 
   async function save() {
     const limit = parseFloat(form.monthly_limit);
-    const cat = form.category.trim();
+    const cat = form.category.trim().toLowerCase();
     if (!cat || !limit || limit <= 0) return;
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return;

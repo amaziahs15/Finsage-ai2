@@ -34,8 +34,8 @@ function TxnPage() {
       user_id: u.user.id,
       kind: form.kind,
       amount: amt,
-      category: form.category || null,
-      description: form.description || null,
+      category: form.category ? form.category.trim().toLowerCase() : null,
+      description: form.description ? form.description.trim() : null,
       txn_date: form.txn_date,
     });
     setOpen(false);

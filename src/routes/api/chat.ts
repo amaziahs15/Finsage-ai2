@@ -319,7 +319,7 @@ export const Route = createFileRoute("/api/chat")({
         for (const t of monthTxns) {
           if (t.kind !== "expense" || !t.category) continue;
           const cat = t.category.toLowerCase().trim();
-          catSpend[cat] = (catSpend[cat] ?? 0) + Number(t.amount);
+          catSpend[cat] = (catSpend[cat] ?? 0) + Math.abs(Number(t.amount));
         }
         const topCats = Object.entries(catSpend).sort((a, b) => b[1] - a[1]).slice(0, 8);
         const budgetLines = budgets.map((b) => {

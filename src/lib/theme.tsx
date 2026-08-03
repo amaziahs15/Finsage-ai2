@@ -17,11 +17,11 @@ function apply(t: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
+  const [theme, setThemeState] = useState<Theme>("dark");
   const manuallySet = useRef(false);
 
   useEffect(() => {
-    let initial: Theme = "light";
+    let initial: Theme = "dark";
     try {
       const saved = localStorage.getItem(KEY);
       if (saved === "dark" || saved === "light") initial = saved;
