@@ -171,17 +171,28 @@ export function GlobalVoiceListener() {
                 const json = JSON.parse(line.slice(5).trim());
                 if (json.type === "delta") {
                    acc += json.text;
-                   // Fast-path for AI-detected navigation
-                   if (acc.startsWith("NAVIGATE_TO:")) {
-                      const targetRoute = acc.split(":")[1].trim();
-                      if (targetRoute && targetRoute.startsWith("/")) {
-                         speak(lang === "ta" ? "திறக்கிறேன்" : lang === "hi" ? "खोल रहा हूँ" : `Opening ${targetRoute.slice(1)}`);
-                         navigate({ to: targetRoute });
-                         return; // Stop processing stream
-                      }
+                   if (acc.includes("NAVIGATE_TO:")) {
+                      // Only navigate when we have the full path, which we can safely get at "done"
+                      // or we can wait for the stream to finish to avoid partial paths like "/"
                    }
                 } else if (json.type === "done") {
-                   if (!acc.startsWith("NAVIGATE_TO:")) {
+                   if (acc.includes("NAVIGATE_TO:")) {
+                      const match = acc.match(/NAVIGATE_TO:(\/[a-z0-9-]+)/i);
+                      if (match && match[1]) {
+                         const targetRoute = match[1];
+                         speak(lang === "ta" ? "திறக்கிறேன்" : lang === "hi" ? "खोल रहा हूँ" : `Opening ${targetRoute.slice(1)}`);
+                         navigate({ to: targetRoute });
+                      } else {
+                         speak("Sorry, I couldn't find that page.");
+                      }
+                   } else if (acc.includes("CHANGE_LANG:")) {
+                      const match = acc.match(/CHANGE_LANG:(en|hi|ta)/i);
+                      if (match && match[1]) {
+                         const newLang = match[1] as "en" | "hi" | "ta";
+                         setLang(newLang);
+                         speak(newLang === "ta" ? "மொழி தமிழுக்கு மாற்றப்பட்டது" : newLang === "hi" ? "भाषा हिंदी में बदल दी गई है" : "Language changed to English");
+                      }
+                   } else {
                      speak(acc);
                    }
                    return;
