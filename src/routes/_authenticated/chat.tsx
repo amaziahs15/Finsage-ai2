@@ -265,8 +265,8 @@ function ChatPage() {
               <div className="absolute right-1">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="p-1.5 text-muted-foreground hover:text-navy hover:bg-muted rounded-md transition-colors" title="Options">
-                      <MoreVertical className="h-4 w-4" />
+                    <button className="p-1.5 text-slate-500 hover:text-navy hover:bg-slate-200 rounded-md transition-colors" title="Options">
+                      <MoreVertical className="h-5 w-5" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-32">
